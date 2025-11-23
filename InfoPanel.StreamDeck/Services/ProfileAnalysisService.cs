@@ -12,10 +12,12 @@ namespace InfoPanel.StreamDeck.Services
     {
         private readonly string _profilesDir;
         private readonly string _pluginsDir;
+        private readonly FileLoggingService _logger;
         private static readonly Dictionary<string, PluginManifest?> _pluginManifestCache = new();
 
-        public ProfileAnalysisService()
+        public ProfileAnalysisService(FileLoggingService logger)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _profilesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Elgato", "StreamDeck", "ProfilesV2");
             _pluginsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Elgato", "StreamDeck", "Plugins");
         }
@@ -24,39 +26,32 @@ namespace InfoPanel.StreamDeck.Services
         {
             var buttons = new Dictionary<string, ButtonInfo>();
             var profilePath = Path.Combine(_profilesDir, $"{profileUuid}.sdProfile");
-            // Use a hardcoded path in the root of the C drive or a known accessible location for debugging
-            var debugLogPath = @"C:\Users\Public\infopanel_streamdeck_debug.txt";
 
-            void Log(string message)
-            {
-                try { File.AppendAllText(debugLogPath, $"{DateTime.Now}: {message}\n"); } catch { }
-            }
-
-            Log($"Analyzing profile: {profileUuid}");
+            _logger.LogInfo($"Analyzing profile: {profileUuid}");
 
             if (!Directory.Exists(profilePath))
             {
-                Log($"Profile directory not found: {profilePath}");
+                _logger.LogWarning($"Profile directory not found: {profilePath}");
                 return buttons;
             }
             var profilesSubDir = Path.Combine(profilePath, "Profiles");
             if (!Directory.Exists(profilesSubDir))
             {
-                Log("Profiles subdirectory not found.");
+                _logger.LogWarning("Profiles subdirectory not found.");
                 return buttons;
             }
 
             // Process ALL pages and merge results
             // We prioritize buttons with content (Title/Image)
             var dirsToProcess = Directory.GetDirectories(profilesSubDir);
-            Log($"Found {dirsToProcess.Length} page directories.");
+            _logger.LogInfo($"Found {dirsToProcess.Length} page directories.");
 
             foreach (var dir in dirsToProcess)
             {
                 var manifestPath = Path.Combine(dir, "manifest.json");
                 if (!File.Exists(manifestPath)) continue;
 
-                Log($"Processing page: {Path.GetFileName(dir)}");
+                _logger.LogInfo($"Processing page: {Path.GetFileName(dir)}");
 
                 try
                 {
@@ -117,11 +112,11 @@ namespace InfoPanel.StreamDeck.Services
                                     else if (Path.IsPathRooted(image) && File.Exists(image)) info.IconPath = image;
                                     else
                                     {
-                                        Log($"Image not found for {key}: {image}");
-                                        Log($"Checked: {p1}");
-                                        Log($"Checked: {p2}");
-                                        Log($"Checked: {p3}");
-                                        Log($"Checked: {p5}");
+                                        _logger.LogWarning($"Image not found for {key}: {image}");
+                                        _logger.LogInfo($"Checked: {p1}");
+                                        _logger.LogInfo($"Checked: {p2}");
+                                        _logger.LogInfo($"Checked: {p3}");
+                                        _logger.LogInfo($"Checked: {p5}");
                                     }
                                 }
                                 else if (!string.IsNullOrEmpty(actionData.UUID))
@@ -140,11 +135,11 @@ namespace InfoPanel.StreamDeck.Services
 
                                     if (!string.IsNullOrEmpty(pluginUuid))
                                     {
-                                        string? defaultIcon = ResolveDefaultIcon(pluginUuid, actionData.UUID, actionData.State, Log);
+                                        string? defaultIcon = ResolveDefaultIcon(pluginUuid, actionData.UUID, actionData.State);
                                         if (!string.IsNullOrEmpty(defaultIcon))
                                         {
                                             info.IconPath = defaultIcon;
-                                            Log($"Resolved default icon for {key}: {defaultIcon}");
+                                            _logger.LogInfo($"Resolved default icon for {key}: {defaultIcon}");
                                         }
                                     }
                                 }
@@ -156,7 +151,7 @@ namespace InfoPanel.StreamDeck.Services
                                     if (!string.IsNullOrEmpty(info.Title) || !string.IsNullOrEmpty(info.IconPath))
                                     {
                                         buttons[key] = info;
-                                        Log($"Added button {key}: Title='{info.Title}', Icon='{info.IconPath}'");
+                                        _logger.LogInfo($"Added button {key}: Title='{info.Title}', Icon='{info.IconPath}'");
                                     }
                                 }
                                 else
@@ -174,12 +169,12 @@ namespace InfoPanel.StreamDeck.Services
                                     if (!existingHasContent && newHasContent)
                                     {
                                         buttons[key] = info;
-                                        Log($"Updated button {key} (was empty)");
+                                        _logger.LogInfo($"Updated button {key} (was empty)");
                                     }
                                     else if (string.IsNullOrEmpty(existing.IconPath) && !string.IsNullOrEmpty(info.IconPath))
                                     {
                                         buttons[key] = info; // Prefer one with icon
-                                        Log($"Updated button {key} (added icon)");
+                                        _logger.LogInfo($"Updated button {key} (added icon)");
                                     }
                                 }
                             }
@@ -188,14 +183,14 @@ namespace InfoPanel.StreamDeck.Services
                 }
                 catch (Exception ex)
                 {
-                    Log($"Error processing page {dir}: {ex.Message}");
+                    _logger.LogError($"Error processing page {dir}: {ex.Message}");
                 }
             }
 
             return buttons;
         }
 
-        private string? ResolveDefaultIcon(string pluginUuid, string actionUuid, int state, Action<string> log)
+        private string? ResolveDefaultIcon(string pluginUuid, string actionUuid, int state)
         {
             try
             {
@@ -214,13 +209,13 @@ namespace InfoPanel.StreamDeck.Services
                         }
                         catch (Exception ex)
                         {
-                            log($"Error parsing plugin manifest for {pluginUuid}: {ex.Message}");
+                            _logger.LogError($"Error parsing plugin manifest for {pluginUuid}: {ex.Message}");
                             _pluginManifestCache[pluginUuid] = null;
                         }
                     }
                     else
                     {
-                        log($"Plugin manifest not found: {manifestPath}");
+                        _logger.LogWarning($"Plugin manifest not found: {manifestPath}");
                         _pluginManifestCache[pluginUuid] = null;
                     }
                 }
@@ -248,14 +243,14 @@ namespace InfoPanel.StreamDeck.Services
                             // Also check for @2x variants
                             if (File.Exists(fullPath + "@2x.png")) return fullPath + "@2x.png";
 
-                            log($"Default icon not found on disk: {fullPath}");
+                            _logger.LogWarning($"Default icon not found on disk: {fullPath}");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                log($"Error resolving default icon: {ex.Message}");
+                _logger.LogError($"Error resolving default icon: {ex.Message}");
             }
             return null;
         }

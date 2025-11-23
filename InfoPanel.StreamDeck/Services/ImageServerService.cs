@@ -14,14 +14,16 @@ namespace InfoPanel.StreamDeck.Services
         private readonly HttpListener _listener;
         private readonly ConcurrentDictionary<string, string> _imagePaths = new();
         private readonly ConcurrentDictionary<string, string> _pathToId = new();
+        private readonly FileLoggingService _logger;
         private Task? _listenTask;
         private CancellationTokenSource? _cts;
         private int _port;
 
         public string BaseUrl => $"http://localhost:{_port}/images/";
 
-        public ImageServerService()
+        public ImageServerService(FileLoggingService logger)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _listener = new HttpListener();
             _port = GetFreePort();
             _listener.Prefixes.Add(BaseUrl);
@@ -34,11 +36,11 @@ namespace InfoPanel.StreamDeck.Services
                 _listener.Start();
                 _cts = new CancellationTokenSource();
                 _listenTask = Task.Run(() => ListenLoop(_cts.Token));
-                Console.WriteLine($"[ImageServer] Started on {BaseUrl}");
+                _logger.LogInfo($"[ImageServer] Started on {BaseUrl}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ImageServer] Failed to start: {ex.Message}");
+                _logger.LogError($"[ImageServer] Failed to start: {ex.Message}");
             }
         }
 
@@ -73,7 +75,7 @@ namespace InfoPanel.StreamDeck.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[ImageServer] Error accepting request: {ex.Message}");
+                    _logger.LogError($"[ImageServer] Error accepting request: {ex.Message}");
                 }
             }
         }

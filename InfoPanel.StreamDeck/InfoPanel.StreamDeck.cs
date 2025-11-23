@@ -20,6 +20,7 @@ namespace InfoPanel.StreamDeck
         private MonitoringService? _monitoringService;
         private SensorManagementService? _sensorService;
         private ConfigurationService? _configService;
+        private FileLoggingService? _loggingService;
         private ImageServerService? _imageServer;
         private CancellationTokenSource? _cancellationTokenSource;
 
@@ -40,9 +41,10 @@ namespace InfoPanel.StreamDeck
                 Console.WriteLine($"[StreamDeck] Config file path: {_configFilePath}");
 
                 _configService = new ConfigurationService(_configFilePath);
-                _sensorService = new SensorManagementService(_configService);
-                _monitoringService = new MonitoringService(_configService);
-                _imageServer = new ImageServerService();
+                _loggingService = new FileLoggingService(_configService);
+                _sensorService = new SensorManagementService(_configService, _loggingService);
+                _monitoringService = new MonitoringService(_configService, _loggingService);
+                _imageServer = new ImageServerService(_loggingService);
                 _imageServer.Start();
 
                 _monitoringService.DataUpdated += OnDataUpdated;
@@ -72,11 +74,12 @@ namespace InfoPanel.StreamDeck
                 _cancellationTokenSource = new CancellationTokenSource();
                 _ = StartMonitoringAsync(_cancellationTokenSource.Token);
 
-                Console.WriteLine("[StreamDeck] Plugin initialized successfully");
+                _loggingService.LogInfo("[StreamDeck] Plugin initialized successfully");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[StreamDeck] Error during plugin initialization: {ex.Message}");
+                _loggingService?.LogError("Error during plugin initialization", ex);
                 throw;
             }
         }
@@ -145,6 +148,7 @@ namespace InfoPanel.StreamDeck
                 _monitoringService?.Dispose();
                 _imageServer?.Dispose();
                 _cancellationTokenSource?.Dispose();
+                _loggingService?.Dispose();
 
                 Console.WriteLine("[StreamDeck] Plugin disposed successfully");
             }

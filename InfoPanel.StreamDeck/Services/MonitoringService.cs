@@ -45,6 +45,7 @@ namespace InfoPanel.StreamDeck.Services
         public event EventHandler<DataUpdatedEventArgs>? DataUpdated;
 
         private readonly ConfigurationService _configService;
+        private readonly FileLoggingService _logger;
         private volatile bool _isMonitoring;
         private readonly object _lockObject = new();
         private Task? _monitoringTask;
@@ -59,11 +60,12 @@ namespace InfoPanel.StreamDeck.Services
         private readonly ProfileAnalysisService _profileAnalysis;
         private DateTime _lastLogScan = DateTime.MinValue;
 
-        public MonitoringService(ConfigurationService configService)
+        public MonitoringService(ConfigurationService configService, FileLoggingService logger)
         {
             _configService = configService ?? throw new ArgumentNullException(nameof(configService));
-            _profileAnalysis = new ProfileAnalysisService();
-            Console.WriteLine("[MonitoringService] Service initialized");
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _profileAnalysis = new ProfileAnalysisService(logger);
+            _logger.LogInfo("[MonitoringService] Service initialized");
         }
 
         public void RefreshDevices()
@@ -90,7 +92,7 @@ namespace InfoPanel.StreamDeck.Services
                 _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             }
 
-            Console.WriteLine("[MonitoringService] Monitoring started");
+            _logger.LogInfo("[MonitoringService] Monitoring started");
             _monitoringTask = Task.Run(() => MonitorLoop(_cts.Token));
             await Task.CompletedTask;
         }
@@ -282,34 +284,31 @@ namespace InfoPanel.StreamDeck.Services
 
         private void PollRegistry()
         {
-            var debugLogPath = @"C:\Users\Public\infopanel_streamdeck_debug.txt";
-            void Log(string message) { try { File.AppendAllText(debugLogPath, $"{DateTime.Now} [Monitor]: {message}\n"); } catch { } }
-
             try
             {
-                Log("Polling Registry...");
+                _logger.LogInfo("Polling Registry...");
                 using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Elgato Systems GmbH\StreamDeck"))
                 {
                     if (key == null)
                     {
-                        Log("Registry key not found.");
+                        _logger.LogWarning("Registry key not found.");
                         return;
                     }
 
                     var bytes = key.GetValue("Devices") as byte[];
                     if (bytes == null)
                     {
-                        Log("Devices value is null.");
+                        _logger.LogWarning("Devices value is null.");
                         return;
                     }
 
                     string raw = Encoding.Unicode.GetString(bytes);
                     string clean = raw.Replace("\0", "");
-                    Log($"Registry content length: {clean.Length}");
+                    _logger.LogInfo($"Registry content length: {clean.Length}");
 
                     var pattern = @"ESDProfilesPreferred[\s\S]*?([a-fA-F0-9-]{36})[\s\S]*?(@\(1\)\[\d+/\d+/(.*?)\])";
                     var matches = Regex.Matches(clean, pattern);
-                    Log($"Found {matches.Count} matches.");
+                    _logger.LogInfo($"Found {matches.Count} matches.");
 
                     var foundSerials = new HashSet<string>();
 
@@ -321,12 +320,12 @@ namespace InfoPanel.StreamDeck.Services
 
                         foundSerials.Add(serial);
 
-                        Log($"Match: Serial={serial}, UUID={uuid}");
+                        _logger.LogInfo($"Match: Serial={serial}, UUID={uuid}");
 
                         if (!_devices.ContainsKey(serial))
                         {
                             _devices[serial] = new DeviceState { Serial = serial, FullId = fullId };
-                            Log($"New device detected: {serial}");
+                            _logger.LogInfo($"New device detected: {serial}");
                         }
 
                         var device = _devices[serial];
@@ -348,7 +347,7 @@ namespace InfoPanel.StreamDeck.Services
 
                         if (device.ProfileUuid != uuid)
                         {
-                            Log($"Profile changed for {serial}: {device.ProfileUuid} -> {uuid}");
+                            _logger.LogInfo($"Profile changed for {serial}: {device.ProfileUuid} -> {uuid}");
                             device.ProfileUuid = uuid;
                             device.ProfileName = GetProfileName(uuid);
                             device.Buttons = _profileAnalysis.GetButtonInfo(uuid);
@@ -357,7 +356,7 @@ namespace InfoPanel.StreamDeck.Services
                         else
                         {
                             // Force update for debugging if needed, or just log
-                            Log($"Profile unchanged for {serial}: {uuid}");
+                            _logger.LogInfo($"Profile unchanged for {serial}: {uuid}");
                             // Uncomment to force update during debug
                             device.Buttons = _profileAnalysis.GetButtonInfo(uuid);
                         }
@@ -368,14 +367,13 @@ namespace InfoPanel.StreamDeck.Services
                     foreach (var stale in staleSerials)
                     {
                         _devices.Remove(stale);
-                        Log($"Removed stale device: {stale}");
+                        _logger.LogInfo($"Removed stale device: {stale}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Log($"Error in PollRegistry: {ex.Message}");
-                Console.WriteLine($"[MonitoringService] Error polling registry: {ex.Message}");
+                _logger.LogError($"Error in PollRegistry: {ex.Message}");
             }
         }
 
@@ -413,7 +411,7 @@ namespace InfoPanel.StreamDeck.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[MonitoringService] Error in DataUpdated event: {ex.Message}");
+                _logger.LogError($"Error in DataUpdated event: {ex.Message}");
             }
         }
 
@@ -423,11 +421,11 @@ namespace InfoPanel.StreamDeck.Services
             {
                 StopMonitoringAsync().Wait();
                 _cts?.Dispose();
-                Console.WriteLine("[MonitoringService] Service disposed");
+                _logger.LogInfo("[MonitoringService] Service disposed");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[MonitoringService] Error during disposal: {ex.Message}");
+                _logger.LogError($"Error during disposal: {ex.Message}");
             }
         }
     }

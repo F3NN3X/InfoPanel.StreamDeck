@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 - **Dynamic Sensor Naming**: Sensors are now named based on the actual button title (e.g., "Mute Mic") instead of generic coordinates.
 - **Smart Button Management**: Unused buttons are now automatically hidden from the sensor list.
 - **Default Icon Resolution**: Added logic to resolve default plugin icons when custom icons are not set.
+- **Enhanced Logging**: Integrated comprehensive file-based debug logging across all services.
+- **Project Cleanup**: Removed unused scripts and updated .gitignore for better project hygiene.
 
 ### Fixed
 

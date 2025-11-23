@@ -310,8 +310,10 @@ namespace InfoPanel.StreamDeck.Services
                     }
 
                     string raw = Encoding.Unicode.GetString(bytes);
-                    // Replace nulls with newlines to preserve separation between strings
-                    string clean = raw.Replace("\0", "\n");
+                    // Revert to removing nulls completely as the registry seems to use UTF-32 or wide chars
+                    // which results in many nulls between characters when read as UTF-16.
+                    // Replacing with \n breaks the words (e.g. D\ne\nv\ni\nc\ne\nN\na\nm\ne).
+                    string clean = raw.Replace("\0", "");
                     _logger.LogInfo($"Registry content length: {clean.Length}");
 
                     var pattern = @"ESDProfilesPreferred[\s\S]*?([a-fA-F0-9-]{36})[\s\S]*?(@\(1\)\[\d+/\d+/(.*?)\])";
@@ -342,7 +344,7 @@ namespace InfoPanel.StreamDeck.Services
                         // Look for DeviceName in the text BEFORE this match (but after the previous match)
                         int searchStart = previousMatchEnd;
                         int searchLength = match.Index - searchStart;
-                        
+
                         string detectedName = "Stream Deck";
 
                         if (searchLength > 0)

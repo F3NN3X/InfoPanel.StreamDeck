@@ -1,0 +1,266 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Core Framework Configuration -->
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>false</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Platforms>x64</Platforms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    
+    <!-- Version Management -->
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    
+    <!-- Assembly Metadata (Template placeholders) -->
+    <AssemblyTitle>InfoPanel.StreamDeck</AssemblyTitle>
+    <AssemblyDescription>InfoPanel plugin to retrive data from Elgato Stream Deck</AssemblyDescription>
+    <AssemblyCompany>F3NN3X</AssemblyCompany>
+    <AssemblyCopyright>Copyright © F3NN3X 2025</AssemblyCopyright>
+    <AssemblyProduct>InfoPanel StreamDeck Plugin</AssemblyProduct>
+    
+    <!-- Plugin-Specific Configuration -->
+    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <UseAppHost>false</UseAppHost>
+    
+    <!-- Advanced Output Path with Versioning -->
+    <OutputPath>bin\$(Configuration)\$(TargetFramework)\InfoPanel.StreamDeck-v$(Version)\InfoPanel.StreamDeck\</OutputPath>
+    <BaseOutputPath>bin\$(Configuration)\$(TargetFramework)\InfoPanel.StreamDeck-v$(Version)\</BaseOutputPath>
+    
+    <!-- Build Optimization -->
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+    
+    <!-- Code Analysis -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <!-- Configuration-Specific Settings -->
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>false</Optimize>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Common InfoPanel Plugin Dependencies -->
+    <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
+    <PackageReference Include="System.Management" Version="9.0.0" />
+    <PackageReference Include="Vanara.PInvoke.User32" Version="4.0.5" />
+    <PackageReference Include="Vanara.PInvoke.Kernel32" Version="4.0.5" />
+    
+    <!-- Add other common packages as needed -->
+    <!-- <PackageReference Include="Newtonsoft.Json" Version="13.0.3" /> -->
+    <!-- <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" /> -->
+    <!-- <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0" /> -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- InfoPanel Framework Reference -->
+    <ProjectReference Include="E:\GitHub\PublicRepos\infopanel\InfoPanel.Plugins\InfoPanel.Plugins.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Plugin Metadata Files -->
+    <None Include="PluginInfo.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>PluginInfo.ini</TargetPath>
+    </None>
+    
+    <!-- Configuration Files -->
+    <None Include="InfoPanel.StreamDeck.ini" Condition="Exists('InfoPanel.StreamDeck.ini')">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>InfoPanel.StreamDeck.ini</TargetPath>
+    </None>
+    
+    <!-- Documentation Files -->
+    <None Include="README.md" Condition="Exists('README.md')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    
+    <None Include="CHANGELOG.md" Condition="Exists('CHANGELOG.md')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Clean Target Enhancement -->
+  <Target Name="EnhancedClean" BeforeTargets="Clean">
+    <Message Text="🧹 Enhanced cleanup: Removing versioned output directories..." Importance="high" />
+    <ItemGroup>
+      <OldVersionDirs Include="bin\**\InfoPanel.StreamDeck-v*" />
+      <TempFiles Include="bin\**\*.tmp;obj\**\*.tmp" />
+      <LogFiles Include="**\*.log" Exclude="docs\**\*.log" />
+    </ItemGroup>
+    <RemoveDir Directories="@(OldVersionDirs)" ContinueOnError="true" />
+    <Delete Files="@(TempFiles);@(LogFiles)" ContinueOnError="true" />
+  </Target>
+
+  <!-- Pre-Build: Version Validation -->
+  <Target Name="ValidateVersion" BeforeTargets="BeforeBuild">
+    <Message Text="🔍 Building InfoPanel.StreamDeck v$(Version)..." Importance="high" />
+    <Error Condition="'$(Version)' == ''" Text="Version property must be set in the project file" />
+    <Error Condition="!Exists('PluginInfo.ini')" Text="PluginInfo.ini file is required for InfoPanel plugins" />
+  </Target>
+
+  <!-- Post-Build: Dependency Management & Cleanup -->
+  <Target Name="ManageDependencies" AfterTargets="PostBuildEvent">
+    <Message Text="📦 Managing dependencies and cleaning output..." Importance="high" />
+    
+    <!-- Get all dependency DLLs (excluding main plugin and InfoPanel framework) -->
+    <ItemGroup>
+      <SubdirDLLs Include="$(OutputPath)**\*.dll" Exclude="$(OutputPath)*.dll" />
+      <SubdirPDBs Include="$(OutputPath)**\*.pdb" Exclude="$(OutputPath)*.pdb" />
+      <UnnecessaryFiles Include="$(OutputPath)*.xml;$(OutputPath)*.json" />
+      <CleanupDirs Include="$(OutputPath)runtimes;$(OutputPath)net8.0-windows;$(OutputPath)amd64;$(OutputPath)arm64;$(OutputPath)x86;$(OutputPath)refs" />
+    </ItemGroup>
+    
+    <!-- Move dependencies to root level -->
+    <Copy SourceFiles="@(SubdirDLLs)" 
+          DestinationFolder="$(OutputPath)" 
+          SkipUnchangedFiles="true" 
+          OverwriteReadOnlyFiles="true" />
+    
+    <!-- Copy PDBs for debug builds only -->
+    <Copy SourceFiles="@(SubdirPDBs)" 
+          DestinationFolder="$(OutputPath)" 
+          SkipUnchangedFiles="true" 
+          OverwriteReadOnlyFiles="true" 
+          Condition="'$(Configuration)'=='Debug'" />
+    
+    <!-- Clean up unnecessary files and directories -->
+    <Delete Files="@(UnnecessaryFiles)" ContinueOnError="true" />
+    <Delete Files="@(SubdirPDBs)" Condition="'$(Configuration)'=='Release'" ContinueOnError="true" />
+    <RemoveDir Directories="@(CleanupDirs)" ContinueOnError="true" />
+    
+    <Message Text="✅ Dependencies managed successfully" Importance="high" />
+  </Target>
+
+  <!-- Post-Build: Release Archive Creation -->
+  <Target Name="CreateReleaseArchive" AfterTargets="ManageDependencies" Condition="'$(Configuration)'=='Release'">
+    <Message Text="📦 Creating release archive..." Importance="high" />
+    
+    <PropertyGroup>
+      <ArchiveFileName>InfoPanel.StreamDeck-v$(Version).zip</ArchiveFileName>
+      <ArchivePath>$(BaseOutputPath)$(ArchiveFileName)</ArchivePath>
+      <PluginSourceDir>$(OutputPath)</PluginSourceDir>
+      <TempZipDir>$(BaseOutputPath)temp_zip</TempZipDir>
+    </PropertyGroup>
+    
+    <!-- Remove existing archive and temp directory -->
+    <Delete Files="$(ArchivePath)" ContinueOnError="true" />
+    <RemoveDir Directories="$(TempZipDir)" ContinueOnError="true" />
+    
+    <!-- Create temp directory structure -->
+    <MakeDir Directories="$(TempZipDir)\InfoPanel.StreamDeck" />
+    
+    <!-- Get plugin files -->
+    <ItemGroup>
+      <PluginFiles Include="$(PluginSourceDir)**\*.*" />
+    </ItemGroup>
+    
+    <!-- Copy files to temp directory -->
+    <Copy SourceFiles="@(PluginFiles)" 
+          DestinationFiles="@(PluginFiles->'$(TempZipDir)\InfoPanel.StreamDeck\%(RecursiveDir)%(Filename)%(Extension)')" />
+    
+    <!-- Create the ZIP archive -->
+    <ZipDirectory SourceDirectory="$(TempZipDir)" 
+                  DestinationFile="$(ArchivePath)" 
+                  Overwrite="true" />
+    
+    <!-- Clean up temp directory -->
+    <RemoveDir Directories="$(TempZipDir)" />
+    
+    <Message Text="✅ Archive created: $(ArchivePath)" Importance="high" />
+    <Message Text="📊 Archive contains $(PluginFiles->Count()) files" Importance="high" />
+  </Target>
+
+  <!-- Post-Build: Build Summary -->
+  <Target Name="BuildSummary" AfterTargets="CreateReleaseArchive">
+    <PropertyGroup>
+      <BuildSummaryText>
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                     📋 Build Summary - InfoPanel.StreamDeck                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+🏗️  Configuration: $(Configuration)
+🏷️  Version: $(Version)
+📁 Output: $(OutputPath)
+📦 Main Assembly: InfoPanel.StreamDeck.dll
+📋 Metadata: PluginInfo.ini
+      </BuildSummaryText>
+    </PropertyGroup>
+    
+    <Message Text="$(BuildSummaryText)" Importance="high" />
+    
+    <!-- Release-specific summary -->
+    <Message Text="🎉 Release archive: $(BaseOutputPath)InfoPanel.StreamDeck-v$(Version).zip" 
+             Importance="high" 
+             Condition="'$(Configuration)'=='Release'" />
+  </Target>
+
+  <!-- Custom Target: Version Management Helper -->
+  <Target Name="VersionInfo">
+    <Message Text="🏷️  Current Version: $(Version)" Importance="high" />
+    <Message Text="📝 To update version: dotnet build -p:Version=1.0.1" Importance="high" />
+    <Message Text="⚠️  Remember to update:" Importance="high" />
+    <Message Text="   • PluginInfo.ini" Importance="high" />
+    <Message Text="   • CHANGELOG.md" Importance="high" />
+    <Message Text="   • README.md" Importance="high" />
+  </Target>
+
+  <!-- Custom Target: Template Cleanup (for template distribution) -->
+  <Target Name="CleanTemplate">
+    <Message Text="🧹 Cleaning template artifacts..." Importance="high" />
+    
+    <ItemGroup>
+      <TemplateArtifacts Include="bin\**\*;obj\**\*;*.user;*.suo;.vs\**\*" />
+      <LogFiles Include="**\*.log" />
+      <TempFiles Include="**\*.tmp" />
+    </ItemGroup>
+    
+    <Delete Files="@(TemplateArtifacts);@(LogFiles);@(TempFiles)" ContinueOnError="true" />
+    <RemoveDir Directories="bin;obj;.vs" ContinueOnError="true" />
+    
+    <Message Text="✅ Template cleaned and ready for distribution" Importance="high" />
+  </Target>
+
+  <!-- Development Helper Targets -->
+  <Target Name="DevInfo">
+    <Message Text="🛠️  Development Information:" Importance="high" />
+    <Message Text="   📁 Output: $(OutputPath)" Importance="high" />
+    <Message Text="   🏷️  Version: $(Version)" Importance="high" />
+    <Message Text="   ⚙️  Config: $(Configuration)" Importance="high" />
+    <Message Text="   🎯 Target: $(TargetFramework)" Importance="high" />
+    <Message Text="   📦 Archive: $(BaseOutputPath)InfoPanel.StreamDeck-v$(Version).zip" Importance="high" />
+  </Target>
+
+  <Target Name="QuickBuild">
+    <Message Text="⚡ Quick build shortcuts:" Importance="high" />
+    <Message Text="   Debug:   dotnet build" Importance="high" />
+    <Message Text="   Release: dotnet build -c Release" Importance="high" />
+    <Message Text="   Clean:   dotnet clean" Importance="high" />
+    <Message Text="   Info:    dotnet build -t:DevInfo" Importance="high" />
+  </Target>
+
+</Project>

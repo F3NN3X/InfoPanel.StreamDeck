@@ -1,0 +1,10 @@
+@Variant(@(0)[]DeviceName
+Stream DeckESDProfilesInfo(ESDProfilesPreferred
+Hefcd890f-739e-4d12-8b01-71aaa31a1993:@(1)[4057/128/A00SA3462M7IQE]DeviceName
+Stream Deck MK2ESDProfilesInfo(ESDProfilesPreferred
+H3bc8935a-76f4-4f64-9df2-ca678aa26522$map_dev_brightness#map_dev_enabled&map_dev_orientation:@(1)[4057/132/A00WA31412FYR5]DeviceName
+$Stream Deck + LEFTESDProfilesInfo(ESDProfilesPreferred
+H5ea59dc9-6ff5-47cd-8ea8-c7f9871c63ee$map_dev_brightness3map_dev_enabled:@(1)[4057/132/A00WA4221OHZFE]DeviceName
+&Stream Deck + RIGHTESDProfilesInfo(ESDProfilesPreferred
+Hed2972c3-c983-4960-9e8e-14dd774efdd5$map_dev_brightness2"LastUsedNameIndexIPreferredDevice
+:@(1)[4057/128/A00SA3462M7IQE])

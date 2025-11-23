@@ -1,0 +1,10 @@
+# Ignore all folders starting with a dot anywhere in the project
+**/.*/
+
+# Ignore bin and obj folders anywhere in the project
+**/bin/
+**/obj/
+
+# Ignore all log files
+*.log
+

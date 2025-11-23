@@ -1,0 +1,82 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [1.1.0] - 2025-11-23
+
+### Added
+- **Local Image Server**: Implemented a local HTTP server to serve Stream Deck button icons to InfoPanel via `http://localhost` URLs.
+- **Dynamic Sensor Naming**: Sensors are now named based on the actual button title (e.g., "Mute Mic") instead of generic coordinates.
+- **Smart Button Management**: Unused buttons are now automatically hidden from the sensor list.
+- **Default Icon Resolution**: Added logic to resolve default plugin icons when custom icons are not set.
+
+### Fixed
+- **Duplicate Devices**: Fixed an issue where the same Stream Deck device would appear multiple times in the device list.
+- **Image Path Resolution**: Fixed issues with resolving paths for custom and default icons.
+
+## [1.0.0] - 2024-03-20
+
+### Added
+- Initial plugin template implementation
+- Service-based architecture with MonitoringService, SensorManagementService, ConfigurationService, and FileLoggingService
+- Comprehensive configuration management with file-based settings
+- Thread-safe sensor updates with proper locking
+- User-controllable debug logging with multiple log levels
+- Professional build system with ZIP creation and dependency management
+- Interactive PowerShell setup script for automated plugin creation
+- Template data models with validation and formatting
+- Comprehensive documentation and TODO comments
+- Based on InfoPanel Plugin Template v1.0
+
+### Features
+- Event-driven monitoring with async data collection
+- Automatic error handling and graceful degradation
+- Configurable monitoring intervals and timeouts
+- Professional logging with rotation and multiple levels
+- Thread-safe updates with collection modification protection
+- Build automation with version management and archiving
+
+### TODO for Plugin Developers
+- Customize data collection logic in MonitoringService
+- Add plugin-specific properties to TemplateData model
+- Configure monitoring intervals and connection settings
+- Add validation rules for configuration settings
+- Implement plugin-specific sensor types and formatting
+- Update documentation with plugin-specific information
+
+---
+
+## Template Notes
+
+This changelog template follows standard format conventions. When creating your plugin:
+
+1. **Replace TEMPLATE_* placeholders** with your actual values
+2. **Document all changes** by version with clear categories
+3. **Follow semantic versioning** (MAJOR.MINOR.PATCH)
+4. **Include dates** in YYYY-MM-DD format
+5. **Use clear categories**: Added, Changed, Deprecated, Removed, Fixed, Security
+
+### Example Entry Format:
+```markdown
+## [1.0.1] - 2024-01-15
+
+### Added
+- New temperature monitoring sensor
+- Configuration setting for temperature unit (C/F)
+
+### Changed  
+- Improved error handling in data collection
+- Updated sensor refresh rate to 500ms
+
+### Fixed
+- Memory leak in monitoring service disposal
+- Thread safety issue in sensor updates
+```
+
+### Version Update Checklist:
+- [ ] Update version in .csproj file
+- [ ] Update version in PluginInfo.ini
+- [ ] Update version references in source comments
+- [ ] Add changelog entry with date
+- [ ] Test build and ZIP creation
+- [ ] Verify all features work correctly

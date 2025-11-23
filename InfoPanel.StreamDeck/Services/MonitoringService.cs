@@ -111,7 +111,7 @@ namespace InfoPanel.StreamDeck.Services
                 try { await _monitoringTask; } catch (OperationCanceledException) { }
             }
 
-            Console.WriteLine("[MonitoringService] Monitoring stopped");
+            _logger.LogInfo("[MonitoringService] Monitoring stopped");
         }
 
         private void MonitorLoop(CancellationToken token)
@@ -122,7 +122,7 @@ namespace InfoPanel.StreamDeck.Services
                 int result = RegOpenKeyEx(HKEY_CURRENT_USER, @"Software\Elgato Systems GmbH\StreamDeck", 0, KEY_READ, out hKey);
                 if (result != 0)
                 {
-                    Console.WriteLine($"Error opening registry key: {result}. Registry monitoring aborted.");
+                    _logger.LogError($"Error opening registry key: {result}. Registry monitoring aborted.");
                     return;
                 }
 

@@ -38,10 +38,10 @@ namespace InfoPanel.StreamDeck
                 string basePath = assembly.ManifestModule.FullyQualifiedName;
                 _configFilePath = $"{basePath}.ini";
 
-                Console.WriteLine($"[StreamDeck] Config file path: {_configFilePath}");
-
                 _configService = new ConfigurationService(_configFilePath);
                 _loggingService = new FileLoggingService(_configService);
+                _loggingService.LogInfo($"[StreamDeck] Config file path: {_configFilePath}");
+
                 _sensorService = new SensorManagementService(_configService, _loggingService);
                 _monitoringService = new MonitoringService(_configService, _loggingService);
                 _imageServer = new ImageServerService(_loggingService);
@@ -78,8 +78,7 @@ namespace InfoPanel.StreamDeck
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[StreamDeck] Error during plugin initialization: {ex.Message}");
-                _loggingService?.LogError("Error during plugin initialization", ex);
+                _loggingService?.LogError($"[StreamDeck] Error during plugin initialization: {ex.Message}", ex);
                 throw;
             }
         }
@@ -111,11 +110,11 @@ namespace InfoPanel.StreamDeck
             }
             catch (OperationCanceledException)
             {
-                Console.WriteLine("[StreamDeck] Monitoring cancelled");
+                _loggingService?.LogInfo("[StreamDeck] Monitoring cancelled");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[StreamDeck] Error in monitoring: {ex.Message}");
+                _loggingService?.LogError($"[StreamDeck] Error in monitoring: {ex.Message}", ex);
             }
         }
 
@@ -130,7 +129,7 @@ namespace InfoPanel.StreamDeck
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[StreamDeck] Error updating sensors: {ex.Message}");
+                _loggingService?.LogError($"[StreamDeck] Error updating sensors: {ex.Message}", ex);
             }
         }
 
@@ -148,13 +147,13 @@ namespace InfoPanel.StreamDeck
                 _monitoringService?.Dispose();
                 _imageServer?.Dispose();
                 _cancellationTokenSource?.Dispose();
+                
+                _loggingService?.LogInfo("[StreamDeck] Plugin disposed successfully");
                 _loggingService?.Dispose();
-
-                Console.WriteLine("[StreamDeck] Plugin disposed successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[StreamDeck] Error during disposal: {ex.Message}");
+                _loggingService?.LogError($"[StreamDeck] Error during disposal: {ex.Message}", ex);
             }
         }
     }

@@ -147,7 +147,7 @@ namespace InfoPanel.StreamDeck
                 _monitoringService?.Dispose();
                 _imageServer?.Dispose();
                 _cancellationTokenSource?.Dispose();
-                
+
                 _loggingService?.LogInfo("[StreamDeck] Plugin disposed successfully");
                 _loggingService?.Dispose();
             }

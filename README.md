@@ -113,7 +113,7 @@ StreamDeck.cs              # Main plugin class
 │   ├── ConfigurationService.cs      # INI configuration management
 │   └── FileLoggingService.cs        # Debug logging
 ├── Models/
-│   └── TemplateData.cs              # Data structure
+│   └── StreamDeckData.cs            # Data structure
 └── PluginInfo.ini                   # Plugin metadata
 ```
 
@@ -129,7 +129,7 @@ StreamDeck.cs              # Main plugin class
 
 1. **New Sensors**: Define in main class, add to container, update in sensor service
 2. **New Configuration**: Add settings to ConfigurationService with section-based accessors
-3. **New Data Properties**: Extend TemplateData model and update validation
+3. **New Data Properties**: Extend StreamDeckData model and update validation
 
 ## Troubleshooting
 
@@ -183,4 +183,4 @@ For issues, questions, or contributions:
 
 ## Acknowledgments
 
-Built using the InfoPanel Plugin Template v1.0.
+Elgato Stream Deck SDK documentation.

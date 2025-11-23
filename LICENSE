@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2024 TEMPLATE_AUTHOR
+Copyright (c) 2024 F3NN3X
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,16 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-InfoPanel Plugin Template v1.0
-
-This template includes proven patterns and practices that have been validated
-through real-world usage and extensive testing.
-
-Template Features:
-- Service-based architecture and thread safety implementations
-- INI configuration management following InfoPanel standards
-- Comprehensive logging systems with rotation
-- Build automation and deployment scripts

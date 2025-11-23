@@ -14,7 +14,7 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     
-    <!-- Assembly Metadata (Template placeholders) -->
+    <!-- Assembly Metadata -->
     <AssemblyTitle>InfoPanel.StreamDeck</AssemblyTitle>
     <AssemblyDescription>InfoPanel plugin to retrive data from Elgato Stream Deck</AssemblyDescription>
     <AssemblyCompany>F3NN3X</AssemblyCompany>
@@ -227,22 +227,6 @@
     <Message Text="   • PluginInfo.ini" Importance="high" />
     <Message Text="   • CHANGELOG.md" Importance="high" />
     <Message Text="   • README.md" Importance="high" />
-  </Target>
-
-  <!-- Custom Target: Template Cleanup (for template distribution) -->
-  <Target Name="CleanTemplate">
-    <Message Text="🧹 Cleaning template artifacts..." Importance="high" />
-    
-    <ItemGroup>
-      <TemplateArtifacts Include="bin\**\*;obj\**\*;*.user;*.suo;.vs\**\*" />
-      <LogFiles Include="**\*.log" />
-      <TempFiles Include="**\*.tmp" />
-    </ItemGroup>
-    
-    <Delete Files="@(TemplateArtifacts);@(LogFiles);@(TempFiles)" ContinueOnError="true" />
-    <RemoveDir Directories="bin;obj;.vs" ContinueOnError="true" />
-    
-    <Message Text="✅ Template cleaned and ready for distribution" Importance="high" />
   </Target>
 
   <!-- Development Helper Targets -->

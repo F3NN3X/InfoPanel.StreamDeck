@@ -5,18 +5,21 @@ All notable changes to this project will be documented in this file.
 ## [1.1.0] - 2025-11-23
 
 ### Added
+
 - **Local Image Server**: Implemented a local HTTP server to serve Stream Deck button icons to InfoPanel via `http://localhost` URLs.
 - **Dynamic Sensor Naming**: Sensors are now named based on the actual button title (e.g., "Mute Mic") instead of generic coordinates.
 - **Smart Button Management**: Unused buttons are now automatically hidden from the sensor list.
 - **Default Icon Resolution**: Added logic to resolve default plugin icons when custom icons are not set.
 
 ### Fixed
+
 - **Duplicate Devices**: Fixed an issue where the same Stream Deck device would appear multiple times in the device list.
 - **Image Path Resolution**: Fixed issues with resolving paths for custom and default icons.
 
 ## [1.0.0] - 2024-03-20
 
 ### Added
+
 - Initial plugin template implementation
 - Service-based architecture with MonitoringService, SensorManagementService, ConfigurationService, and FileLoggingService
 - Comprehensive configuration management with file-based settings
@@ -29,6 +32,7 @@ All notable changes to this project will be documented in this file.
 - Based on InfoPanel Plugin Template v1.0
 
 ### Features
+
 - Event-driven monitoring with async data collection
 - Automatic error handling and graceful degradation
 - Configurable monitoring intervals and timeouts
@@ -37,6 +41,7 @@ All notable changes to this project will be documented in this file.
 - Build automation with version management and archiving
 
 ### TODO for Plugin Developers
+
 - Customize data collection logic in MonitoringService
 - Add plugin-specific properties to TemplateData model
 - Configure monitoring intervals and connection settings
@@ -56,7 +61,8 @@ This changelog template follows standard format conventions. When creating your 
 4. **Include dates** in YYYY-MM-DD format
 5. **Use clear categories**: Added, Changed, Deprecated, Removed, Fixed, Security
 
-### Example Entry Format:
+### Example Entry Format
+
 ```markdown
 ## [1.0.1] - 2024-01-15
 
@@ -73,7 +79,8 @@ This changelog template follows standard format conventions. When creating your 
 - Thread safety issue in sensor updates
 ```
 
-### Version Update Checklist:
+### Version Update Checklist
+
 - [ ] Update version in .csproj file
 - [ ] Update version in PluginInfo.ini
 - [ ] Update version references in source comments

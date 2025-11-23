@@ -2,7 +2,7 @@
 
 **Version:** 1.0.0  
 **Author:** F3NN3X  
-**Website:** 
+**Website:**
 
 ## Description
 
@@ -32,16 +32,19 @@ This plugin includes comprehensive InfoPanel plugin development documentation:
 ## Installation
 
 1. Build the plugin in Release mode:
+
    ```powershell
    dotnet build -c Release
    ```
 
 2. The plugin will be built to:
+
    ```
    bin\Release\net8.0-windows\StreamDeck-v1.0.0\StreamDeck\
    ```
 
 3. A distribution ZIP file will also be created:
+
    ```
    bin\Release\net8.0-windows\StreamDeck-v1.0.0.zip
    ```
@@ -53,6 +56,7 @@ This plugin includes comprehensive InfoPanel plugin development documentation:
 ## Configuration
 
 After first run, the plugin creates a configuration file:
+
 ```
 StreamDeck.dll.ini
 ```
@@ -69,6 +73,7 @@ Use InfoPanel's "Open Config" button to easily access and edit the configuration
 ## Building from Source
 
 ### Prerequisites
+
 - .NET 8.0 SDK or later
 - Visual Studio 2022 or JetBrains Rider (optional)
 - InfoPanel installed with InfoPanel.Plugins.dll available
@@ -76,16 +81,19 @@ Use InfoPanel's "Open Config" button to easily access and edit the configuration
 ### Build Commands
 
 **Debug Build:**
+
 ```powershell
 dotnet build -c Debug
 ```
 
 **Release Build:**
+
 ```powershell
 dotnet build -c Release
 ```
 
 **Clean Build:**
+
 ```powershell
 dotnet clean
 dotnet build -c Release
@@ -128,6 +136,7 @@ StreamDeck.cs              # Main plugin class
 ### Enable Debug Logging
 
 Edit the configuration file and set:
+
 ```ini
 [Debug Settings]
 EnableDebugLogging=true
@@ -139,16 +148,19 @@ Check the log file: `StreamDeck-debug.log`
 ### Common Issues
 
 **Plugin Not Loading:**
+
 - Ensure InfoPanel.Plugins.dll reference is correct
 - Verify all dependencies are in the plugin directory
 - Check that .NET 8.0 runtime is installed
 
 **No Data Appearing:**
+
 - Enable debug logging and check for errors
 - Verify monitoring service is starting correctly
 - Check data source connectivity
 
 **Configuration Not Saving:**
+
 - Verify file permissions in plugin directory
 - Check INI file syntax (section headers and key=value format)
 - Review debug logs for file access errors
@@ -164,6 +176,7 @@ See [LICENSE](LICENSE) for license information.
 ## Support
 
 For issues, questions, or contributions:
+
 - Check debug logs first
 - Review InfoPanel documentation
 - Contact: F3NN3X ()

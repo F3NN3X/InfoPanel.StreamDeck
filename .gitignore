@@ -1,10 +1,42 @@
-# Ignore all folders starting with a dot anywhere in the project
-**/.*/
+# Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
 
-# Ignore bin and obj folders anywhere in the project
-**/bin/
-**/obj/
+# Build results
+[Bb]in/
+[Oo]bj/
+x64/
+x86/
+[Dd]ebug/
+[Rr]elease/
 
-# Ignore all log files
+# Logs
 *.log
+*.txt
+!LICENSE
+!README.md
+!CHANGELOG.md
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.~*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# InfoPanel Plugin specific
+*.ini
+!InfoPanel.StreamDeck/PluginInfo.ini
+
+# Scripts and dumps
+*.ps1
+*_dump.txt
 

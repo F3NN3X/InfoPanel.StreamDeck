@@ -10,6 +10,7 @@ namespace InfoPanel.StreamDeck.Models
         private readonly ImageServerService _imageServer;
 
         public PluginText Serial { get; set; }
+        public PluginText DeviceName { get; set; }
         public PluginText ProfileName { get; set; }
         public PluginText ProfileUuid { get; set; }
         public Dictionary<string, PluginText> Buttons { get; set; } = new();
@@ -17,12 +18,13 @@ namespace InfoPanel.StreamDeck.Models
 
         private readonly string _serial;
 
-        public DeviceSensors(IPluginContainer container, string serial, string profileName, string profileUuid, ImageServerService imageServer)
+        public DeviceSensors(IPluginContainer container, string serial, string deviceName, string profileName, string profileUuid, ImageServerService imageServer)
         {
             _container = container;
             _imageServer = imageServer;
             _serial = serial;
             Serial = new PluginText($"serial-{serial}", "Serial Number", serial);
+            DeviceName = new PluginText($"name-{serial}", "Device Name", deviceName);
             ProfileName = new PluginText($"profile-{serial}", "Active Profile", profileName);
             ProfileUuid = new PluginText($"uuid-{serial}", "Profile UUID", profileUuid);
         }

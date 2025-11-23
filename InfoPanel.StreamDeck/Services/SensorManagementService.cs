@@ -31,6 +31,7 @@ namespace InfoPanel.StreamDeck.Services
                         if (activeSensors.TryGetValue(device.Serial, out var sensors))
                         {
                             sensors.Serial.Value = device.Serial;
+                            sensors.DeviceName.Value = device.DeviceName;
                             sensors.ProfileName.Value = device.ProfileName;
                             sensors.ProfileUuid.Value = device.ProfileUuid;
 

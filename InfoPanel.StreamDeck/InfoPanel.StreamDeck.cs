@@ -56,9 +56,10 @@ namespace InfoPanel.StreamDeck
                 foreach (var device in devices)
                 {
                     var container = new PluginContainer(device.Serial, device.DeviceName);
-                    var sensors = new DeviceSensors(container, device.Serial, device.ProfileName, device.ProfileUuid, _imageServer);
+                    var sensors = new DeviceSensors(container, device.Serial, device.DeviceName, device.ProfileName, device.ProfileUuid, _imageServer);
 
                     container.Entries.Add(sensors.Serial);
+                    container.Entries.Add(sensors.DeviceName);
                     container.Entries.Add(sensors.ProfileName);
                     container.Entries.Add(sensors.ProfileUuid);
 

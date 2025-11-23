@@ -265,12 +265,18 @@ namespace InfoPanel.StreamDeck.Services
                     {
                         if (_idToCustomName.TryGetValue(kvp.Key, out string? customName))
                         {
-                            device.DeviceName = customName ?? device.DeviceName;
+                            // Only overwrite if current name is default or empty
+                            if (device.DeviceName == "Stream Deck" || string.IsNullOrEmpty(device.DeviceName))
+                            {
+                                device.DeviceName = customName ?? device.DeviceName;
+                            }
                         }
                     }
                 }
             }
 
+            // Heuristic matching removed as it conflicts with Registry data
+            /*
             var knownCustomNames = _idToCustomName.Values.ToHashSet();
             var unmappedDevices = _devices.Values.Where(d => !knownCustomNames.Contains(d.DeviceName)).ToList();
             var usedCustomNames = _devices.Values.Select(d => d.DeviceName).Where(n => knownCustomNames.Contains(n)).ToHashSet();
@@ -280,6 +286,7 @@ namespace InfoPanel.StreamDeck.Services
             {
                 unmappedDevices[0].DeviceName = availableCustomNames[0];
             }
+            */
         }
 
         private void PollRegistry()
@@ -303,7 +310,8 @@ namespace InfoPanel.StreamDeck.Services
                     }
 
                     string raw = Encoding.Unicode.GetString(bytes);
-                    string clean = raw.Replace("\0", "");
+                    // Replace nulls with newlines to preserve separation between strings
+                    string clean = raw.Replace("\0", "\n");
                     _logger.LogInfo($"Registry content length: {clean.Length}");
 
                     var pattern = @"ESDProfilesPreferred[\s\S]*?([a-fA-F0-9-]{36})[\s\S]*?(@\(1\)\[\d+/\d+/(.*?)\])";
@@ -311,6 +319,7 @@ namespace InfoPanel.StreamDeck.Services
                     _logger.LogInfo($"Found {matches.Count} matches.");
 
                     var foundSerials = new HashSet<string>();
+                    int previousMatchEnd = 0;
 
                     foreach (Match match in matches)
                     {
@@ -330,23 +339,31 @@ namespace InfoPanel.StreamDeck.Services
 
                         var device = _devices[serial];
 
-                        // Always try to update the name from registry
-                        int idIndex = match.Groups[2].Index;
-                        string context = clean.Substring(idIndex, Math.Min(500, clean.Length - idIndex));
-                        var nameMatch = Regex.Match(context, @"DeviceName[\W_]*([A-Za-z0-9 \-_]+)");
-                        if (nameMatch.Success)
+                        // Look for DeviceName in the text BEFORE this match (but after the previous match)
+                        int searchStart = previousMatchEnd;
+                        int searchLength = match.Index - searchStart;
+                        
+                        string detectedName = "Stream Deck";
+
+                        if (searchLength > 0)
                         {
-                            string newName = nameMatch.Groups[1].Value.Trim();
-                            if (device.DeviceName != newName)
+                            string context = clean.Substring(searchStart, searchLength);
+                            // We want the LAST DeviceName in this chunk, as it belongs to the current device block
+                            // Capture until a control character (like newline from null replacement)
+                            var nameMatches = Regex.Matches(context, @"DeviceName[\W_]*([^\n\r\x00-\x1F]+)");
+                            if (nameMatches.Count > 0)
                             {
-                                device.DeviceName = newName;
-                                _logger.LogInfo($"Updated device name for {serial}: {newName}");
+                                detectedName = nameMatches[nameMatches.Count - 1].Groups[1].Value.Trim();
                             }
                         }
-                        else if (string.IsNullOrEmpty(device.DeviceName))
+
+                        if (device.DeviceName != detectedName)
                         {
-                            device.DeviceName = "Stream Deck";
+                            device.DeviceName = detectedName;
+                            _logger.LogInfo($"Updated device name for {serial}: {detectedName}");
                         }
+
+                        previousMatchEnd = match.Index + match.Length;
 
                         if (device.ProfileUuid != uuid)
                         {

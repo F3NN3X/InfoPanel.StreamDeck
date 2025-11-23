@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 
 - **Duplicate Devices**: Fixed an issue where the same Stream Deck device would appear multiple times in the device list.
 - **Image Path Resolution**: Fixed issues with resolving paths for custom and default icons.
+- **Device Renaming**: Fixed an issue where renaming a Stream Deck device would not update the name in the plugin.
 
 ## [1.0.0] - 2024-03-20
 

@@ -351,11 +351,13 @@ namespace InfoPanel.StreamDeck.Services
                         {
                             string context = clean.Substring(searchStart, searchLength);
                             // We want the LAST DeviceName in this chunk, as it belongs to the current device block
-                            // Capture until a control character (like newline from null replacement)
-                            var nameMatches = Regex.Matches(context, @"DeviceName[\W_]*([^\n\r\x00-\x1F]+)");
+                            // The name is followed by "ESDProfilesInfo" or similar, so we stop at "ESD"
+                            var nameMatches = Regex.Matches(context, @"DeviceName[\W_]*(.*?)ESD");
                             if (nameMatches.Count > 0)
                             {
                                 detectedName = nameMatches[nameMatches.Count - 1].Groups[1].Value.Trim();
+                                // Remove any trailing non-printable chars if they somehow got in
+                                detectedName = Regex.Replace(detectedName, @"[\x00-\x1F]+$", "");
                             }
                         }
 

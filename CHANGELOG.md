@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2025-11-23
+
+### Fixed
+
+- **Registry Parsing**: Fixed a critical issue where null bytes in the registry data prevented correct parsing of device names.
+- **Device Renaming**: Improved regex logic to correctly extract custom device names from the registry binary blob.
+
 ## [1.1.0] - 2025-11-23
 
 ### Added

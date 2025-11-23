@@ -10,32 +10,32 @@ namespace InfoPanel.StreamDeck.Services
     public class FileLoggingService : IDisposable
     {
         #region Fields
-        
+
         private readonly ConfigurationService _configService;
         private readonly string _logFilePath;
         private readonly object _logLock = new();
         private StreamWriter? _logWriter;
         private bool _disposed = false;
-        
+
         #endregion
 
         #region Constructor
-        
+
         public FileLoggingService(ConfigurationService configService)
         {
             _configService = configService ?? throw new ArgumentNullException(nameof(configService));
-            
+
             // Create log file path
             var logDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
             _logFilePath = Path.Combine(logDirectory, "StreamDeck-debug.log");
-            
+
             InitializeLogging();
         }
-        
+
         #endregion
 
         #region Initialization
-        
+
         /// <summary>
         /// Initializes the logging system
         /// </summary>
@@ -48,7 +48,7 @@ namespace InfoPanel.StreamDeck.Services
                     // Create or append to log file
                     _logWriter = new StreamWriter(_logFilePath, append: true);
                     _logWriter.AutoFlush = true;
-                    
+
                     // Log session start
                     WriteToLog("INFO", "=== StreamDeck Debug Session Started ===");
                     WriteToLog("INFO", $"Plugin Version: 1.1.0");
@@ -60,11 +60,11 @@ namespace InfoPanel.StreamDeck.Services
                 Console.WriteLine($"[FileLoggingService] Error initializing logging: {ex.Message}");
             }
         }
-        
+
         #endregion
 
         #region Logging Methods
-        
+
         /// <summary>
         /// Logs an informational message
         /// </summary>
@@ -72,7 +72,7 @@ namespace InfoPanel.StreamDeck.Services
         {
             LogMessage("INFO", message);
         }
-        
+
         /// <summary>
         /// Logs a warning message
         /// </summary>
@@ -80,7 +80,7 @@ namespace InfoPanel.StreamDeck.Services
         {
             LogMessage("WARN", message);
         }
-        
+
         /// <summary>
         /// Logs an error message
         /// </summary>
@@ -88,7 +88,7 @@ namespace InfoPanel.StreamDeck.Services
         {
             LogMessage("ERROR", message);
         }
-        
+
         /// <summary>
         /// Logs an error with exception details
         /// </summary>
@@ -97,7 +97,7 @@ namespace InfoPanel.StreamDeck.Services
             LogMessage("ERROR", $"{message}: {exception.Message}");
             LogMessage("ERROR", $"Stack Trace: {exception.StackTrace}");
         }
-        
+
         /// <summary>
         /// Logs a debug message (only if debug logging is enabled)
         /// </summary>
@@ -108,7 +108,7 @@ namespace InfoPanel.StreamDeck.Services
                 LogMessage("DEBUG", message);
             }
         }
-        
+
         /// <summary>
         /// Logs a verbose message (only if verbose logging is enabled)
         /// </summary>
@@ -119,7 +119,7 @@ namespace InfoPanel.StreamDeck.Services
                 LogMessage("VERBOSE", message);
             }
         }
-        
+
         /// <summary>
         /// Logs a message with specified level
         /// </summary>
@@ -127,7 +127,7 @@ namespace InfoPanel.StreamDeck.Services
         {
             if (!_configService.IsDebugLoggingEnabled || _disposed)
                 return;
-            
+
             try
             {
                 WriteToLog(level, message);
@@ -137,23 +137,23 @@ namespace InfoPanel.StreamDeck.Services
                 Console.WriteLine($"[FileLoggingService] Error writing log: {ex.Message}");
             }
         }
-        
+
         /// <summary>
         /// Writes formatted log entry to file
         /// </summary>
         private void WriteToLog(string level, string message)
         {
             if (_logWriter == null) return;
-            
+
             lock (_logLock)
             {
                 try
                 {
                     var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
                     var logEntry = $"[{timestamp}] [{level}] {message}";
-                    
+
                     _logWriter.WriteLine(logEntry);
-                    
+
                     // Also write to console for immediate feedback
                     Console.WriteLine($"[StreamDeck] {logEntry}");
                 }
@@ -163,11 +163,11 @@ namespace InfoPanel.StreamDeck.Services
                 }
             }
         }
-        
+
         #endregion
 
         #region Log Level Control
-        
+
         /// <summary>
         /// Determines if a message should be logged based on current log level
         /// </summary>
@@ -175,9 +175,9 @@ namespace InfoPanel.StreamDeck.Services
         {
             if (!_configService.IsDebugLoggingEnabled)
                 return false;
-            
+
             var configuredLevel = _configService.DebugLogLevel.ToUpperInvariant();
-            
+
             // Log level hierarchy: ERROR > WARN > INFO > DEBUG > VERBOSE
             return configuredLevel switch
             {
@@ -189,11 +189,11 @@ namespace InfoPanel.StreamDeck.Services
                 _ => messageLevel is "ERROR" or "WARN" or "INFO" // Default to INFO level
             };
         }
-        
+
         #endregion
 
         #region Data Logging Helpers
-        
+
         /// <summary>
         /// Logs monitoring data for debugging
         /// </summary>
@@ -204,7 +204,7 @@ namespace InfoPanel.StreamDeck.Services
                 LogMessage("DEBUG", $"[{dataSource}] Data: {data}");
             }
         }
-        
+
         /// <summary>
         /// Logs performance metrics
         /// </summary>
@@ -216,7 +216,7 @@ namespace InfoPanel.StreamDeck.Services
                 LogMessage("DEBUG", $"[PERF] {metricName}: {value:F2}{unitText}");
             }
         }
-        
+
         /// <summary>
         /// Logs sensor update information
         /// </summary>
@@ -227,7 +227,7 @@ namespace InfoPanel.StreamDeck.Services
                 LogMessage("VERBOSE", $"[SENSOR] {sensorName} = {value}");
             }
         }
-        
+
         /// <summary>
         /// Logs configuration changes
         /// </summary>
@@ -235,25 +235,25 @@ namespace InfoPanel.StreamDeck.Services
         {
             LogMessage("INFO", $"[CONFIG] {setting}: '{oldValue}' -> '{newValue}'");
         }
-        
+
         /// <summary>
         /// Logs connection events
         /// </summary>
         public void LogConnectionEvent(string eventType, string details = "")
         {
-            var message = string.IsNullOrEmpty(details) ? 
-                $"[CONNECTION] {eventType}" : 
+            var message = string.IsNullOrEmpty(details) ?
+                $"[CONNECTION] {eventType}" :
                 $"[CONNECTION] {eventType}: {details}";
             LogMessage("INFO", message);
         }
-        
+
         #endregion
 
         #region TODO: Add Custom Logging Methods
-        
+
         // TODO: Add logging methods specific to your plugin's needs
         // Examples:
-        
+
         // /// <summary>
         // /// Logs API call information
         // /// </summary>
@@ -261,7 +261,7 @@ namespace InfoPanel.StreamDeck.Services
         // {
         //     LogMessage("DEBUG", $"[API] {endpoint} -> {statusCode} ({duration.TotalMilliseconds:F0}ms)");
         // }
-        
+
         // /// <summary>
         // /// Logs database operation information
         // /// </summary>
@@ -269,7 +269,7 @@ namespace InfoPanel.StreamDeck.Services
         // {
         //     LogMessage("DEBUG", $"[DB] {operation} on {table} ({duration.TotalMilliseconds:F0}ms)");
         // }
-        
+
         // /// <summary>
         // /// Logs file operation information
         // /// </summary>
@@ -278,7 +278,7 @@ namespace InfoPanel.StreamDeck.Services
         //     var sizeText = fileSize >= 0 ? $" ({fileSize} bytes)" : "";
         //     LogMessage("DEBUG", $"[FILE] {operation}: {filePath}{sizeText}");
         // }
-        
+
         // /// <summary>
         // /// Logs network operation information
         // /// </summary>
@@ -286,11 +286,11 @@ namespace InfoPanel.StreamDeck.Services
         // {
         //     LogMessage("DEBUG", $"[NET] {operation} to {address} ({duration.TotalMilliseconds:F0}ms)");
         // }
-        
+
         #endregion
 
         #region Cleanup
-        
+
         /// <summary>
         /// Rotates log file if it gets too large
         /// </summary>
@@ -300,23 +300,23 @@ namespace InfoPanel.StreamDeck.Services
             {
                 if (!File.Exists(_logFilePath))
                     return;
-                
+
                 var fileInfo = new FileInfo(_logFilePath);
                 const long maxSizeBytes = 10 * 1024 * 1024; // 10 MB
-                
+
                 if (fileInfo.Length > maxSizeBytes)
                 {
                     // Close current writer
                     _logWriter?.Close();
                     _logWriter?.Dispose();
-                    
+
                     // Rename old log file
                     var backupPath = _logFilePath.Replace(".log", $"-backup-{DateTime.Now:yyyyMMdd-HHmmss}.log");
                     File.Move(_logFilePath, backupPath);
-                    
+
                     // Reinitialize logging
                     InitializeLogging();
-                    
+
                     LogInfo($"Log file rotated. Backup created: {Path.GetFileName(backupPath)}");
                 }
             }
@@ -325,16 +325,16 @@ namespace InfoPanel.StreamDeck.Services
                 Console.WriteLine($"[FileLoggingService] Error rotating log file: {ex.Message}");
             }
         }
-        
+
         #endregion
 
         #region IDisposable Implementation
-        
+
         public void Dispose()
         {
             if (_disposed)
                 return;
-            
+
             try
             {
                 if (_logWriter != null)
@@ -354,7 +354,7 @@ namespace InfoPanel.StreamDeck.Services
                 _disposed = true;
             }
         }
-        
+
         #endregion
     }
 }

@@ -191,11 +191,14 @@ namespace InfoPanel.StreamDeck.Services
 
                 if (!Directory.Exists(pluginsDir)) return;
 
-                foreach (var file in Directory.GetFiles(pluginsDir, "*.log", SearchOption.AllDirectories))
+                var logFiles = new DirectoryInfo(pluginsDir).GetFiles("*.log", SearchOption.AllDirectories)
+                                    .OrderBy(f => f.LastWriteTime);
+
+                foreach (var fileInfo in logFiles)
                 {
                     try
                     {
-                        using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        using (var fs = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                         using (var sr = new StreamReader(fs))
                         {
                             string content = sr.ReadToEnd();
@@ -208,10 +211,7 @@ namespace InfoPanel.StreamDeck.Services
                                 {
                                     string id = dm.Groups[1].Value;
                                     string name = dm.Groups[2].Value;
-                                    if (!_idToCustomName.ContainsKey(id))
-                                    {
-                                        _idToCustomName[id] = name;
-                                    }
+                                    _idToCustomName[id] = name;
                                 }
                             }
                         }
@@ -330,19 +330,22 @@ namespace InfoPanel.StreamDeck.Services
 
                         var device = _devices[serial];
 
-                        if (string.IsNullOrEmpty(device.DeviceName))
+                        // Always try to update the name from registry
+                        int idIndex = match.Groups[2].Index;
+                        string context = clean.Substring(idIndex, Math.Min(500, clean.Length - idIndex));
+                        var nameMatch = Regex.Match(context, @"DeviceName[\W_]*([A-Za-z0-9 \-_]+)");
+                        if (nameMatch.Success)
                         {
-                            int idIndex = match.Groups[2].Index;
-                            string context = clean.Substring(idIndex, Math.Min(500, clean.Length - idIndex));
-                            var nameMatch = Regex.Match(context, @"DeviceName[\W_]*([A-Za-z0-9 ]+)");
-                            if (nameMatch.Success)
+                            string newName = nameMatch.Groups[1].Value.Trim();
+                            if (device.DeviceName != newName)
                             {
-                                device.DeviceName = nameMatch.Groups[1].Value.Trim();
+                                device.DeviceName = newName;
+                                _logger.LogInfo($"Updated device name for {serial}: {newName}");
                             }
-                            else
-                            {
-                                device.DeviceName = "Stream Deck";
-                            }
+                        }
+                        else if (string.IsNullOrEmpty(device.DeviceName))
+                        {
+                            device.DeviceName = "Stream Deck";
                         }
 
                         if (device.ProfileUuid != uuid)

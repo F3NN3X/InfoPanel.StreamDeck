@@ -51,7 +51,7 @@ namespace InfoPanel.StreamDeck.Services
                     
                     // Log session start
                     WriteToLog("INFO", "=== StreamDeck Debug Session Started ===");
-                    WriteToLog("INFO", $"Plugin Version: 1.0.0");
+                    WriteToLog("INFO", $"Plugin Version: 1.1.0");
                     WriteToLog("INFO", $"Log Level: {_configService.DebugLogLevel}");
                 }
             }

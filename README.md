@@ -1,6 +1,6 @@
 # InfoPanel.StreamDeck
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Author:** F3NN3X  
 **Website:**
 
@@ -40,13 +40,13 @@ This plugin includes comprehensive InfoPanel plugin development documentation:
 2. The plugin will be built to:
 
    ```
-   bin\Release\net8.0-windows\StreamDeck-v1.0.0\StreamDeck\
+   bin\Release\net8.0-windows\StreamDeck-v1.1.0\StreamDeck\
    ```
 
 3. A distribution ZIP file will also be created:
 
    ```
-   bin\Release\net8.0-windows\StreamDeck-v1.0.0.zip
+   bin\Release\net8.0-windows\StreamDeck-v1.1.0.zip
    ```
 
 4. Extract the ZIP file to your InfoPanel plugins directory, or copy the plugin folder manually

@@ -1,4 +1,4 @@
-// InfoPanel.StreamDeck v1.0.0
+// InfoPanel.StreamDeck v1.1.0
 using InfoPanel.Plugins;
 using InfoPanel.StreamDeck.Services;
 using InfoPanel.StreamDeck.Models;

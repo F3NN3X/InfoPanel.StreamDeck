@@ -352,6 +352,7 @@ namespace InfoPanel.StreamDeck.Services
                             string context = clean.Substring(searchStart, searchLength);
                             // We want the LAST DeviceName in this chunk, as it belongs to the current device block
                             // The name is followed by "ESDProfilesInfo" or similar, so we stop at "ESD"
+                            // DEBUG: Regex updated to handle merged strings
                             var nameMatches = Regex.Matches(context, @"DeviceName[\W_]*(.*?)ESD");
                             if (nameMatches.Count > 0)
                             {

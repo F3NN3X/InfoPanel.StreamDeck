@@ -169,6 +169,12 @@ Check the log file: `StreamDeck-debug.log`
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
+## Releasing
+
+1. Bump `<Version>` in `InfoPanel.StreamDeck/InfoPanel.StreamDeck.csproj` and `Version` in `InfoPanel.StreamDeck/PluginInfo.ini`, and add a `CHANGELOG.md` entry (`## [X.Y.Z] - yyyy-MM-dd`).
+2. Commit, then push a tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+
+The *Release Build* workflow (`.github/workflows/release.yml`) builds the plugin, checks the tag matches `<Version>`, and publishes `InfoPanel.StreamDeck-vX.Y.Z.zip` to the GitHub release with the changelog section as notes. It can also be run manually (workflow_dispatch) to build without releasing.
 ## License
 
 See [LICENSE](LICENSE) for license information.

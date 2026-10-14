@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <!-- Core Framework Configuration -->
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -76,10 +76,10 @@
 
   <ItemGroup>
     <!-- InfoPanel Framework Reference -->
-    <ProjectReference Include="E:\GitHub\PublicRepos\infopanel\InfoPanel.Plugins\InfoPanel.Plugins.csproj">
-      <Private>false</Private>
-      <ExcludeAssets>runtime</ExcludeAssets>
-    </ProjectReference>
+    <Reference Include="InfoPanel.Plugins">
+      <HintPath>..\Libs\InfoPanel.Plugins.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
